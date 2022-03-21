@@ -95,5 +95,29 @@ namespace APIAssignment.Controllers
 
             return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
         }
+
+        [Route("api/Dept/Details/{id}")]
+        [HttpGet]
+        public HttpResponseMessage DeptDetails(int id)
+        {
+            APIAssignmentEntities db = new APIAssignmentEntities();
+            var students = (from x in db.Students
+                               where x.DeptId.Equals(id)
+                               select x).ToList();
+
+            var dept = (from y in db.Departments
+                        where y.Id.Equals(id)
+                        select y).FirstOrDefault();
+
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Student, StudentModel>());
+            var mapper = new Mapper(config);
+            var studentList = mapper.Map<List<StudentModel>>(students);
+
+            DeptStudentModel deptStu = new DeptStudentModel();
+            deptStu.Id = dept.Id;
+            deptStu.Name = dept.Name;
+            deptStu.students = studentList;
+            return Request.CreateResponse(HttpStatusCode.OK, deptStu);
+        }
     }
 }
