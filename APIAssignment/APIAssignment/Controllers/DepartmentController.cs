@@ -72,5 +72,27 @@ namespace APIAssignment.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, "Deleted");
         }
 
+        [Route("api/Dept/Edit")]
+        [HttpPut]
+        public HttpResponseMessage Edit(DepartmentModel deptModel)
+        {
+            if (ModelState.IsValid)
+            {
+                APIAssignmentEntities db = new APIAssignmentEntities();
+                var OldDept = (from x in db.Departments
+                            where x.Id.Equals(deptModel.Id)
+                            select x).FirstOrDefault();
+
+                var config = new MapperConfiguration(cfg => cfg.CreateMap<DepartmentModel, Department>());
+                var mapper = new Mapper(config);
+                var dept = mapper.Map<Department>(deptModel);
+
+                db.Entry(OldDept).CurrentValues.SetValues(dept);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, "Edited");
+            }
+
+            return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
+        }
     }
 }
